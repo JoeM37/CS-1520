@@ -11,16 +11,12 @@ from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 from google.appengine.api import mail
 
-###############################################################################
-# We'll just use this convenience function to retrieve and render a template.
 def render_template(handler, templatename, templatevalues={}):
   path = os.path.join(os.path.dirname(__file__), 'templates/' + templatename)
   html = template.render(path, templatevalues)
   handler.response.out.write(html)
 
 
-###############################################################################
-# We'll use this convenience function to retrieve the current user's email.
 def get_user_email():
   result = None
   user = users.get_current_user()
@@ -29,10 +25,12 @@ def get_user_email():
   return result
 
 
-###############################################################################
 class MainPageHandler(webapp2.RequestHandler):
   def get(self):
     email = get_user_email()
+    
+    if email:
+      comment = self.request.get('comment1')
 
     page_params = {
       'user_email': email,
@@ -41,7 +39,6 @@ class MainPageHandler(webapp2.RequestHandler):
     }
     render_template(self, 'index.html', page_params)
 
-###############################################################################
 class ContactHandler(webapp2.RequestHandler):
 	def post(self):
 		name = "Name: " + self.request.get('name') + "\n"
@@ -58,8 +55,7 @@ class ContactHandler(webapp2.RequestHandler):
 					body=comment)
 				message.send()			
 		self.redirect('/')
-  
-###############################################################################
+
 class CommentHandler(webapp2.RequestHandler):
   def post(self):
     email = get_user_email()
@@ -72,20 +68,15 @@ class CommentHandler(webapp2.RequestHandler):
 #         self.redirect('/image?id=' + image_id)
 #     else:
     self.redirect('/')
-    
-###############################################################################
+
 class Comment(ndb.Model):
   user = ndb.StringProperty()
   text = ndb.TextProperty()
   time_created = ndb.DateTimeProperty(auto_now_add=True)  
 
-
-###############################################################################
 class ImageVote(ndb.Model):
   pass
-  
 
-###############################################################################
 mappings = [
   ('/', MainPageHandler),
   ('/comment', CommentHandler),
