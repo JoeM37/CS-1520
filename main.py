@@ -28,6 +28,7 @@ def get_user_email():
 class MainPageHandler(webapp2.RequestHandler):
   def get(self):
     email = get_user_email()
+    
     if email:
       comment = self.request.get('comment1')
 
@@ -55,9 +56,30 @@ class ContactHandler(webapp2.RequestHandler):
 				message.send()			
 		self.redirect('/')
 
+class CommentHandler(webapp2.RequestHandler):
+  def post(self):
+    email = get_user_email()
+#     if email: 
+#         text = self.request.get('comment')
+#         comment = ImageComment()
+#     	comment.user = user
+#     	comment.text = text
+#     	comment.put()
+#         self.redirect('/image?id=' + image_id)
+#     else:
+    self.redirect('/')
+
+class Comment(ndb.Model):
+  user = ndb.StringProperty()
+  text = ndb.TextProperty()
+  time_created = ndb.DateTimeProperty(auto_now_add=True)  
+
+class ImageVote(ndb.Model):
+  pass
 
 mappings = [
   ('/', MainPageHandler),
+  ('/comment', CommentHandler),
   ('/contact', ContactHandler)
 ]
 app = webapp2.WSGIApplication(mappings, debug=True)
